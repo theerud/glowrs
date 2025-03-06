@@ -32,6 +32,7 @@ default = []
 metal = ["candle-core/metal", "candle-nn/metal", "candle-transformers/metal"]
 accelerate = ["candle-core/accelerate", "candle-nn/accelerate", "candle-transformers/accelerate"]
 cuda = ["candle-core/cuda", "candle-nn/cuda", "candle-transformers/cuda"]
+mkl = ["candle-core/mkl", "candle-nn/mkl", "candle-transformers/mkl"]
 clap = ["dep:clap"]
 
 [dev-dependencies]
