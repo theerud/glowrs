@@ -11,6 +11,7 @@ use crate::Result;
 use candle_transformers::models::bert::Config as _BertConfig;
 use candle_transformers::models::distilbert::Config as DistilBertConfig;
 use candle_transformers::models::jina_bert::Config as _JinaBertConfig;
+use candle_transformers::models::xlm_roberta::Config as XLMRobertaConfig;
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -46,7 +47,8 @@ pub(crate) enum BertConfig {
 #[serde(tag = "model_type", rename_all = "kebab-case")]
 pub(crate) enum EmbedderConfig {
     Bert(BertConfig),
-    // XlmRoberta(BertConfig),
+    #[serde(rename(deserialize = "xlm-roberta"))]
+    XLMRoberta(XLMRobertaConfig),
     // Camembert(BertConfig),
     // Roberta(BertConfig),
     #[serde(rename(deserialize = "distilbert"))]

@@ -66,7 +66,7 @@ impl SentenceTransformer {
         let mut tokenizer = Tokenizer::from_str(&tokenizer_config_str)?;
 
         if let Some(pp) = tokenizer.get_padding_mut() {
-            pp.strategy = tokenizers::PaddingStrategy::BatchLongest
+            pp.strategy = tokenizers::PaddingStrategy::BatchLongest;
         } else {
             let pp = tokenizers::PaddingParams {
                 strategy: tokenizers::PaddingStrategy::BatchLongest,

@@ -5,7 +5,10 @@ use tokenizers::{EncodeInput, Tokenizer};
 
 // Re-exports
 pub use candle_transformers::models::{
-    bert::BertModel, distilbert::DistilBertModel, jina_bert::BertModel as JinaBertModel,
+    bert::BertModel,
+    distilbert::DistilBertModel,
+    xlm_roberta::XLMRobertaModel,
+    jina_bert::BertModel as JinaBertModel,
 };
 
 use crate::core::config::model::{BertConfig, EmbedderConfig, ModelType};
@@ -26,6 +29,7 @@ where
             BertConfig::JinaBert(cfg_inner) => Box::new(JinaBertModel::new(vb, &cfg_inner)?),
         }),
         EmbedderConfig::DistilBert(cfg) => Ok(Box::new(DistilBertModel::load(vb, &cfg)?)),
+        EmbedderConfig::XLMRoberta(cfg) => Ok(Box::new(XLMRobertaModel::new(&cfg, vb)?)),
     }
 }
 
@@ -66,7 +70,7 @@ impl EmbedderModel for BertModel {
     #[inline]
     fn encode(&self, token_ids: &Tensor) -> Result<Tensor> {
         let token_type_ids = token_ids.zeros_like()?;
-        Ok(self.forward(token_ids, &token_type_ids)?)
+        Ok(self.forward(token_ids, &token_type_ids, None)?)
     }
 
     fn get_device(&self) -> &Device {
@@ -101,6 +105,24 @@ impl EmbedderModel for DistilBertModel {
 
     fn get_device(&self) -> &Device {
         &self.device
+    }
+}
+
+impl EmbedderModel for XLMRobertaModel {
+    #[inline]
+    fn encode(&self, token_ids: &Tensor) -> Result<Tensor> {
+        let token_type_ids = token_ids.zeros_like()?;
+        let size = token_ids.dim(0)?;
+        let mask: Vec<_> = (0..size)
+            .flat_map(|i| (0..size).map(move |j| u8::from(j > i)))
+            .collect();
+        let mask = Tensor::from_slice(&mask, (size, size), token_ids.device())?;
+        Ok(self.forward(token_ids, &mask, &token_type_ids, None, None, None)?)
+    }
+
+    fn get_device(&self) -> &Device {
+        // FIXME: XLMRobertaModel does not has device field
+        &Device::Cpu
     }
 }
 
