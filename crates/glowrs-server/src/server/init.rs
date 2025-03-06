@@ -30,7 +30,7 @@ pub fn init_router(args: &RouterArgs) -> anyhow::Result<Router> {
     let router = Router::new()
         .route("/v1/embeddings", post(embeddings::infer_text_embeddings))
         .route("/v1/models", get(list_models))
-        .route("/v1/models/:model_id", get(get_model))
+        .route("/v1/models/{model_id}", get(get_model))
         .route("/health", get(default::health_check))
         .with_state(state)
         .layer((
