@@ -25,8 +25,8 @@ impl ServerState {
             return Err(anyhow::anyhow!("No models provided"));
         }
 
-        let map = model_repos
-            .into_iter()
+        let mut map = model_repos
+            .iter()
             .filter_map(|model_repo| {
                 let (name, _) = parse_repo_string(&model_repo).ok()?;
                 let handler = EmbeddingsHandler::from_repo_string(&model_repo, device).ok()?;
@@ -36,6 +36,12 @@ impl ServerState {
                 Some((name.to_string(), (client, Arc::new(executor))))
             })
             .collect::<EmbeddingModelMap>();
+
+        // Add 'default' as alias for model_repos[0] for model_map
+        map.insert(
+            "default".to_string(),
+            map.get(&model_repos[0]).unwrap().clone(),
+        );
 
         Ok(Self { model_map: map })
     }

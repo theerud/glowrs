@@ -13,11 +13,14 @@ pub enum EncodingFormat {
 #[allow(dead_code)]
 pub struct EmbeddingsRequest {
     pub input: Sentences,
+    #[serde(default = "default_model")]
     pub model: String,
     pub encoding_format: Option<EncodingFormat>,
     pub dimensions: Option<usize>,
     pub user: Option<String>,
 }
+
+fn default_model() -> String { "default".to_string() }
 
 #[derive(Debug, Serialize)]
 pub struct EmbeddingsResponse {
