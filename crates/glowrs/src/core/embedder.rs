@@ -132,12 +132,12 @@ pub struct EmbedOutput {
     pub usage: Usage,
 }
 
-/// Encodes a batch of sentences by tokenizing them and running encoding them with the core,
+/// Encodes a batch of sentences by tokenizing them and running encoding them with the model,
 /// and returns the embeddings along with the usage statistics.
 ///
 /// # Arguments
 ///
-/// * `core` - A reference to a `dyn EmbedderModel` trait object.
+/// * `model` - A reference to a `dyn EmbedderModel` trait object.
 /// * `tokenizer` - A reference to a `Tokenizer`.
 /// * `sentences` - A collection of sentences to encode.
 /// * `normalize` - A boolean flag indicating whether to normalize the embeddings or not.
@@ -218,10 +218,10 @@ where
     Ok(EmbedOutput { embeddings, usage })
 }
 
-/// Encodes a batch of sentences using the given `core` and `tokenizer`.
+/// Encodes a batch of sentences using the given `model` and `tokenizer`.
 ///
 /// # Arguments
-/// * `core` - A reference to the embedding core to use.
+/// * `model` - A reference to the embedding model to use.
 /// * `tokenizer` - A reference to the tokenizer to use.
 /// * `sentences` - The sentences to encode.
 /// * `normalize` - A flag indicating whether to normalize the embeddings.
