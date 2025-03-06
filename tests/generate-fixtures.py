@@ -17,6 +17,7 @@ MODELS = [
 	"jinaai/jina-embeddings-v2-small-en",
 	"sentence-transformers/all-MiniLM-L6-v2",
 	"sentence-transformers/multi-qa-distilbert-cos-v1",
+	"sentence-transformers/paraphrase-multilingual-mpnet-base-v2",
 ]
 
 
@@ -32,7 +33,7 @@ if __name__ == "__main__":
 	out = {
 		"fixtures": [
 			{
-				"core": m,
+				"model": m,
 				"examples": generate_examples(m)
 
 			} for m in MODELS]

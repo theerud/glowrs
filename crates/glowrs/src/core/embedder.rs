@@ -252,6 +252,7 @@ mod test {
     const BERT_PATH: &str = "tests/fixtures/all-MiniLM-L6-v2/";
     const JINABERT_PATH: &str = "tests/fixtures/jina-embeddings-v2-base-en/";
     const DISTILBERT_PATH: &str = "tests/fixtures/multi-qa-distilbert-dot-v1/";
+    const XLMROBERTA_PATH: &str = "tests/fixtures/paraphrase-multilingual-mpnet-base-v2/";
 
     #[test]
     fn test_parse_config_bert() -> Result<()> {
@@ -296,6 +297,25 @@ mod test {
         match config.model_type {
             ModelType::Embedding(ps) => match ps {
                 PoolingStrategy::Cls => {}
+                _ => panic!("Invalid pooling type"),
+            },
+            _ => panic!("Invalid core type"),
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_config_xlmroberta() -> Result<()> {
+        let path = Path::new(XLMROBERTA_PATH);
+
+        let model_repo = ModelRepo::from_path(path);
+
+        let config = model_repo.get_config()?;
+
+        match config.model_type {
+            ModelType::Embedding(ps) => match ps {
+                PoolingStrategy::Mean => {}
                 _ => panic!("Invalid pooling type"),
             },
             _ => panic!("Invalid core type"),
