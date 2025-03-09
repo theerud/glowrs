@@ -39,7 +39,7 @@ impl RequestHandler for EmbeddingsHandler {
         let sentences = request.input;
 
         // TODO: Is this even necessary?
-        const NORMALIZE: bool = false;
+        const NORMALIZE: bool = true;
 
         // Infer embeddings
         let EmbedOutput { embeddings, usage } = self
