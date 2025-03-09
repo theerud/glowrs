@@ -114,7 +114,7 @@ impl EmbedderModel for XLMRobertaModel {
         let token_type_ids = token_ids.zeros_like()?;
         let size = token_ids.dim(0)?;
         let mask: Vec<_> = (0..size)
-            .flat_map(|i| (0..size).map(move |j| u8::from(j > i)))
+            .flat_map(|i| (0..size).map(move |j| u8::from(j <= i)))
             .collect();
         let mask = Tensor::from_slice(&mask, (size, size), token_ids.device())?;
         Ok(self.forward(token_ids, &mask, &token_type_ids, None, None, None)?)
