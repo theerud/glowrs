@@ -16,6 +16,7 @@ type EmbeddingModelMap =
 /// Represents the state of the server.
 #[derive(Clone)]
 pub struct ServerState {
+    pub default_model: String,
     pub model_map: EmbeddingModelMap,
 }
 
@@ -25,7 +26,7 @@ impl ServerState {
             return Err(anyhow::anyhow!("No models provided"));
         }
 
-        let mut map = model_repos
+        let map = model_repos
             .iter()
             .filter_map(|model_repo| {
                 let (name, _) = parse_repo_string(&model_repo).ok()?;
@@ -37,12 +38,6 @@ impl ServerState {
             })
             .collect::<EmbeddingModelMap>();
 
-        // Add 'default' as alias for model_repos[0] for model_map
-        map.insert(
-            "default".to_string(),
-            map.get(&model_repos[0]).unwrap().clone(),
-        );
-
-        Ok(Self { model_map: map })
+        Ok(Self { default_model: model_repos[0].clone(), model_map: map })
     }
 }

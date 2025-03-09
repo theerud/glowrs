@@ -23,9 +23,15 @@ pub async fn infer_text_embeddings(
     tracing::trace!("Requested API version: {:?}", query.api_version);
 
     let start = Instant::now();
+    let model = if embeddings_request.model == "default" {
+        server_state.default_model.clone()
+    } else {
+        embeddings_request.model.clone()
+    };
+
     let (client, _) = server_state
         .model_map
-        .get(&embeddings_request.model)
+        .get(&model)
         .ok_or(ServerError::ModelNotFound)?;
 
     let response = client.generate_embedding(embeddings_request).await?;
