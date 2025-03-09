@@ -1,0 +1,58 @@
+ARG PACKAGE="glowrs-server"
+
+# Build container, x86_64 only
+FROM amd64/rust:1-bookworm AS base
+
+# Install Intel oneAPI MKL
+RUN apt-get update && \
+    apt-get install -y gpg-agent curl \
+    && \
+    curl https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+    | gpg --dearmor > /usr/share/keyrings/oneapi-archive-keyring.gpg \
+    && \
+    echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+    | tee /etc/apt/sources.list.d/oneAPI.list \
+    && \
+    apt-get update && apt-get install -y intel-oneapi-mkl-devel \
+    && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install cargo-chef
+RUN cargo install cargo-chef
+
+WORKDIR /build
+
+FROM base AS planner
+
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
+
+FROM base AS builder
+COPY --from=planner /build/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+
+ARG PACKAGE
+COPY . .
+RUN cargo build --release --bin $PACKAGE --features mkl
+
+# Final image
+FROM debian:bookworm-slim
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y openssl libssl-dev ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+ARG PACKAGE
+COPY --from=builder /build/target/release/$PACKAGE /app/$PACKAGE
+COPY --from=builder /opt/intel/oneapi/compiler/latest/lib/libiomp5.so /usr/local/lib/libiomp5.so
+
+HEALTHCHECK --interval=30s --start-period=10s --retries=3 CMD bash -c ':> /dev/tcp/0.0.0.0/3000' || exit 1
+
+ENV RUST_LOG="glowrs=debug,server=debug,tower_http=debug,axum::rejection=trace"
+
+EXPOSE 3000
+ENTRYPOINT ["./glowrs-server", "--host", "0.0.0.0"]
